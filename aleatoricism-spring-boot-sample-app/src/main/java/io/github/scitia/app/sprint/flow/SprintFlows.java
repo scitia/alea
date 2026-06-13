@@ -1,5 +1,6 @@
 package io.github.scitia.app.sprint.flow;
 
+import io.github.scitia.aleatoricism.flows.annotation.BusinessFlow;
 import io.github.scitia.aleatoricism.flows.engine.BusinessFlowBuilder;
 import io.github.scitia.aleatoricism.flows.engine.Flow;
 import io.github.scitia.app.sprint.flow.api.SprintPlanningRequest;
@@ -18,11 +19,19 @@ import org.springframework.context.annotation.Configuration;
 public class SprintFlows {
 
     private final PersistSprintWaypoint persistSprintWaypoint;
+    private final ValidateSprintPlanningRequestWaypoint validationWaypoint;
 
     @Bean(name = "sprint-planning-flow")
+    @BusinessFlow(
+            name = "sprint-planning-flow",
+            description = """
+                Flow to plan a new sprint, including validation,
+                creation, and persistence of the sprint and its associated issues.
+            """
+    )
     public Flow<SprintPlanningRequest, Sprint, SprintPlanningStore> sprintPlanningFlow() {
         return BusinessFlowBuilder.define()
-                .start(new ValidateSprintPlanningRequestWaypoint(), SprintPlanningStore::new)
+                .start(validationWaypoint, SprintPlanningStore::new)
                 .then(new CreateSprintEntityWaypoint())
                 .then(new AddIssuesToSprintWaypoint())
                 .then(persistSprintWaypoint)
