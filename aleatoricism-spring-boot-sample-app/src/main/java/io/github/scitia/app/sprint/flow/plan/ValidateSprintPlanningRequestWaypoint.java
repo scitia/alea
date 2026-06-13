@@ -4,13 +4,14 @@ import io.github.scitia.aleatoricism.flows.api.Waypoint;
 import io.github.scitia.aleatoricism.flows.execution.ExecutionContext;
 import io.github.scitia.app.sprint.api.IssueDto;
 import io.github.scitia.app.sprint.api.SprintPlanningRequest;
+import io.github.scitia.app.sprint.flow.SprintFlows;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-public class ValidateSprintPlanningRequestWaypoint implements Waypoint<SprintPlanningRequest, SprintPlanningRequest> {
+public class ValidateSprintPlanningRequestWaypoint implements Waypoint<SprintPlanningRequest, SprintPlanningRequest, SprintFlows.ExampleStore> {
 
     @Override
-    public SprintPlanningRequest handle(SprintPlanningRequest input, ExecutionContext context) throws Exception {
+    public SprintPlanningRequest handle(SprintPlanningRequest input, ExecutionContext<SprintFlows.ExampleStore> context) throws Exception {
         if (input == null) {
             throw new IllegalArgumentException("Sprint planning request cannot be null.");
         }
@@ -26,6 +27,9 @@ public class ValidateSprintPlanningRequestWaypoint implements Waypoint<SprintPla
         for (IssueDto issue : input.issues()) {
             validateIssue(issue);
         }
+
+        context.getStore().setSprintPlanningRequest(input);
+
         return input;
     }
 

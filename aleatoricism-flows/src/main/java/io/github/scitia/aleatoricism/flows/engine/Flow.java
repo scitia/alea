@@ -7,10 +7,21 @@ import java.util.Objects;
 /**
  * Executable business flow wrapper used by application entry points.
  */
-public record Flow<I, O, S>(Way<I, O> way, S store) {
+public class Flow<I, O, S> {
 
-    public Flow(Way<I, O> way, S store) {
+    private final Way<I, O, S> way;
+    private final S store;
+
+    public Flow(Way<I, O, S> way, S store) {
         this.way = Objects.requireNonNull(way, "way cannot be null");
         this.store = Objects.requireNonNull(store, "store cannot be null");
+    }
+
+    public Way<I, O, S> getWay() {
+        return way;
+    }
+
+    public S getStore() {
+        return store;
     }
 }

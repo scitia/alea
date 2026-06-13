@@ -10,40 +10,27 @@ import java.util.Objects;
 /**
  * Executes a business flow inside a shared execution context.
  */
-public final class FlowEngine implements AutoCloseable {
+public final class FlowEngine {
 
-    private final ExecutionContext context;
-    private final boolean ownsContext;
+    private final ExecutionOptions options;
 
     public FlowEngine() {
-        this(DefaultExecutionContext.create(), true);
+        this(ExecutionOptions.defaults());
     }
 
     public FlowEngine(ExecutionOptions options) {
-        this(DefaultExecutionContext.create(options), true);
+        this.options = Objects.requireNonNull(options, "executionOptions cannot be null");
     }
 
-    public FlowEngine(ExecutionContext context) {
-        this(context, false);
+    public <I, O, S> O run(Way<I, O, S> way, I input, S store) {
+        try (ExecutionContext<S> context = DefaultExecutionContext.create(options, store)) {
+            return way.execute(input, context);
+        }
     }
 
-    private FlowEngine(ExecutionContext context, boolean ownsContext) {
-        this.context = Objects.requireNonNull(context, "context cannot be null");
-        this.ownsContext = ownsContext;
-    }
-
-    public <I, O> O run(Way<I, O> way, I input) {
-        return way.execute(input, context);
-    }
-
-    public <I, O> O run(Flow<I, O> definition, I input) {
-        return run(definition.way(), input);
-    }
-
-    @Override
-    public void close() {
-        if (ownsContext) {
-            context.close();
+    public <I, O, S> O run(Flow<I, O, S> flow, I input) {
+        try (ExecutionContext<S> ctx = DefaultExecutionContext.create(flow.getStore())) {
+            return flow.getWay().execute(input, ctx);
         }
     }
 }

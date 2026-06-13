@@ -4,22 +4,24 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public final class DefaultExecutionContext implements ExecutionContext {
+public final class DefaultExecutionContext<S> implements ExecutionContext<S> {
 
+    private final S store;
     private final ExecutionOptions options;
     private final ExecutorService executor;
 
-    private DefaultExecutionContext(ExecutionOptions options) {
+    private DefaultExecutionContext(ExecutionOptions options, S store) {
         this.options = options;
         this.executor = Executors.newCachedThreadPool();
+        this.store = store;
     }
 
-    public static DefaultExecutionContext create() {
-        return new DefaultExecutionContext(ExecutionOptions.defaults());
+    public static <S> DefaultExecutionContext<S> create(S store) {
+        return new DefaultExecutionContext<>(ExecutionOptions.defaults(), store);
     }
 
-    public static DefaultExecutionContext create(ExecutionOptions options) {
-        return new DefaultExecutionContext(options);
+    public static <S> DefaultExecutionContext<S> create(ExecutionOptions options, S store) {
+        return new DefaultExecutionContext<>(options, store);
     }
 
     @Override
@@ -30,6 +32,11 @@ public final class DefaultExecutionContext implements ExecutionContext {
     @Override
     public Executor executor() {
         return executor;
+    }
+
+    @Override
+    public S getStore() {
+        return store;
     }
 
     @Override

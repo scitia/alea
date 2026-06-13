@@ -1,39 +1,16 @@
 package io.github.scitia.aleatoricism.flows.engine;
 
-import io.github.scitia.aleatoricism.flows.api.Datapoint;
-import io.github.scitia.aleatoricism.flows.api.EmissionPoint;
 import io.github.scitia.aleatoricism.flows.api.Waypoint;
+import io.github.scitia.aleatoricism.flows.way.ConsumerWithContext;
 import io.github.scitia.aleatoricism.flows.way.Way;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public final class BusinessFlowBuilder {
 
-    private BusinessFlowBuilder() {
-    }
-
-    public static final class Store<S> {
-
-        private S store;
-
-        public Store(Class<S> store) throws InstantiationException,
-                IllegalAccessException,
-                NoSuchMethodException,
-                InvocationTargetException {
-            this.store = store.getDeclaredConstructor().newInstance();
-        }
-
-        public S getStore() {
-            return store;
-        }
-
-        public void setStore(S store) {
-            this.store = store;
-        }
-    }
+    private BusinessFlowBuilder() {}
 
     public static Definition define() {
         return new Definition();
@@ -41,85 +18,55 @@ public final class BusinessFlowBuilder {
 
     public static final class Definition {
 
-        private Definition() {
+        private Definition() {}
+
+        public <I, O, S> Path<I, O, S> start(Waypoint<I, O, S> waypoint, Supplier<S> storeFactory) {
+            return new Path<>(Way.from(waypoint), storeFactory);
         }
 
-        public <I, O, S> Path<I, O, S> start(Waypoint<I, O> waypoint) {
-            return new Path<>(Way.step(waypoint));
-        }
-
-        public <I, O, S> Path<I, O, S> start(Datapoint<I, O> datapoint) {
-            return new Path<>(Way.datapoint(datapoint));
-        }
-
-        public <I, O, S> Path<I, O, S> start(Way<I, O> way) {
-            return new Path<>(way);
+        public <I, O, S> Path<I, O, S> start(Way<I, O, S> way, Supplier<S> storeFactory) {
+            return new Path<>(way, storeFactory);
         }
     }
 
     public static final class Path<I, O, S> {
 
-        private Store<S> store;
+        private final Way<I, O, S> current;
+        private final Supplier<S> storeFactory;
 
-        private final Way<I, O> current;
-
-        private Path(Way<I, O> current) {
-            this.current = Objects.requireNonNull(current, "current cannot be null");
+        private Path(Way<I, O, S> current,  Supplier<S> storeFactory) {
+            this.current = Objects.requireNonNull(current);
+            this.storeFactory = Objects.requireNonNull(storeFactory);
         }
 
-        public <N> Path<I, N, S> then(Way<O, N> next, Consumer<S> storeSetup) {
-            storeSetup.accept(store.getStore());
-            return new Path<>(current.then(next));
+        public <N> Path<I, N, S> then(Way<O, N, S> next) {
+            return new Path<>(current.then(next), storeFactory);
         }
 
-        public <N> Path<I, N, S> then(Waypoint<O, N> next, S storeSetup) {
-            this.store.setStore(storeSetup);
-            return then(Way.step(next));
+        public <N> Path<I, N, S> then(Waypoint<O, N, S> waypoint) {
+            return then(Way.from(waypoint));
         }
 
-        public <N> Path<I, N, S> then(Datapoint<O, N> next) {
-            return then(Way.datapoint(next));
-        }
-
-        public <L, R> Path<I, Map.Entry<L, R>, S> parallel(Way<O, L> left, Way<O, R> right) {
+        public <L, R> Path<I, Map.Entry<L, R>, S> parallel(
+                Way<O, L, S> left,
+                Way<O, R, S> right
+        ) {
             return then(Way.parallel(left, right));
         }
 
-        public <L, R> Path<I, Map.Entry<L, R>, S> parallel(Waypoint<O, L> left, Waypoint<O, R> right) {
-            return parallel(Way.step(left), Way.step(right));
+        public <L, R> Path<I, Map.Entry<L, R>, S> parallel(
+                Waypoint<O, L, S> left,
+                Waypoint<O, R, S> right
+        ) {
+            return parallel(Way.from(left), Way.from(right));
         }
 
-        public <L, R> Path<I, Map.Entry<L, R>, S> parallel(Datapoint<O, L> left, Datapoint<O, R> right) {
-            return parallel(Way.datapoint(left), Way.datapoint(right));
+        public Path<I, O, S> emit(ConsumerWithContext<O, S> consumer) {
+            return new Path<>(current.emit(consumer), storeFactory);
         }
 
-        public <L, R> Path<I, Map.Entry<L, R>, S> parallel(Way<O, L> left, Waypoint<O, R> right) {
-            return parallel(left, Way.step(right));
-        }
-
-        public <L, R> Path<I, Map.Entry<L, R>, S> parallel(Waypoint<O, L> left, Way<O, R> right) {
-            return parallel(Way.step(left), right);
-        }
-
-        public <L, R> Path<I, Map.Entry<L, R>, S> parallel(Way<O, L> left, Datapoint<O, R> right) {
-            return parallel(left, Way.datapoint(right));
-        }
-
-        public <L, R> Path<I, Map.Entry<L, R>, S> parallel(Datapoint<O, L> left, Way<O, R> right) {
-            return parallel(Way.datapoint(left), right);
-        }
-
-        public Path<I, O, S> emit(EmissionPoint<O> sideEffect) {
-            return new Path<>(current.emit(sideEffect));
-        }
-
-        public Way<I, O> buildWay() {
-            return current;
-        }
-
-        public <S> Flow<I, O, S> withStore(Class<S> storeType) throws InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException {
-            Store<S>  store = new Store<>(storeType);
-            return new Flow<>(current, store.getStore());
+        public Flow<I, O, S> build() {
+            return new Flow<>(current, storeFactory.get());
         }
     }
 }

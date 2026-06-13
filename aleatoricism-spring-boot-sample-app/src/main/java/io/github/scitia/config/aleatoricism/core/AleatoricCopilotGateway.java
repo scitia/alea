@@ -14,6 +14,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import jakarta.validation.Validator;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
@@ -26,6 +27,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Validated
 @Component
 public class AleatoricCopilotGateway {
@@ -37,6 +39,9 @@ public class AleatoricCopilotGateway {
     public AleatoricCopilotGateway(Validator validator, List<AgenticBusinessTool> businessTools) {
         this.validator = validator;
         this.businessTools = List.copyOf(businessTools);
+        this.businessTools.stream().map(AgenticBusinessTool::toolName).forEach(toolName ->
+                log.info("Registered business tool for aleatoric gateway: {}", toolName)
+        );
     }
 
     public AleatoricCommandResponse execute(@Valid AleatoricCommandRequest request) {

@@ -4,9 +4,7 @@ This sample app includes domain flows for quotes and agile scrum workflows. The 
 
 ## Agile tools
 
-- `agile_create_sprint` creates a sprint summary.
-- `agile_plan_sprint` plans backlog items for a sprint and checks capacity.
-- `agile_add_backlog_item` registers a backlog item with initial metadata.
+- `agile_sprint_planning` registers a backlog item with initial metadata.
 
 ### Sample payloads
 
@@ -19,26 +17,4 @@ This sample app includes domain flows for quotes and agile scrum workflows. The 
   "capacity": 30,
   "team": "alpha"
 }
-```
-
-```json
-{
-  "sprintId": "spr-100",
-  "backlogItemIds": ["bi-1", "bi-2"],
-  "plannedStoryPoints": 21,
-  "capacity": 20,
-  "team": "alpha"
-}
-```
-
-```json
-{
-  "title": "Implement sprint board",
-  "description": "Add basic sprint board with columns",
-  "type": "story",
-  "storyPoints": 5,
-  "priority": 2,
-  "reporter": "product-owner"
-}
-```
 

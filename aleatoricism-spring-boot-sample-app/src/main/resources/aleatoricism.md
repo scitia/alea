@@ -7,19 +7,7 @@ and route them to the appropriate Scrum process based on the intent and path.
 
 ## Scrum Processes and Endpoints
 
-### 1. Sprint Retrospective
-- **Path**: `/scrum/retrospective` or `/scrum/sprint/{sprintId}/retrospective`
-- **Method**: POST
-- **Purpose**: Conduct a sprint retrospective - collect team feedback on what went well, what could improve, and generate action items
-- **Tool**: `scrum_sprint_retrospective`
-- **Practical aspects**:
-  - Gathers team feedback on sprint execution
-  - Identifies improvements for next sprint
-  - Generates actionable items based on challenges
-  - Estimates retrospective duration based on participant count
-  - Emits audit trail for process tracking
-
-### 2. Sprint Planning
+### 1. Sprint Planning
 - **Path**: `/scrum/planning` or `/scrum/sprint/{sprintId}/planning`
 - **Method**: POST
 - **Purpose**: Plan a sprint by selecting backlog items, estimating workload, and validating against team capacity
@@ -31,19 +19,6 @@ and route them to the appropriate Scrum process based on the intent and path.
   - Ensures realistic sprint goals
   - Emits audit trail for commitment tracking
 
-### 3. Sprint Kickoff (Rozpoczynanie Sprintu)
-- **Path**: `/scrum/kickoff` or `/scrum/sprint/{sprintId}/kickoff`
-- **Method**: POST
-- **Purpose**: Formally begin the sprint with team alignment on goals and confirm committed work
-- **Tool**: `scrum_sprint_kickoff`
-- **Practical aspects**:
-  - Confirms team availability and participation
-  - Aligns team on sprint goal and objectives
-  - Reviews committed backlog items
-  - Schedules sprint activities (daily standup, etc.)
-  - Sets expectations for sprint duration
-  - Emits audit trail for sprint initiation
-
 ## Request Format
 
 All Scrum process requests should:
@@ -53,12 +28,8 @@ All Scrum process requests should:
 
 ### Example Request Paths:
 ```
-POST /scrum/retrospective
 POST /scrum/planning
-POST /scrum/kickoff
-POST /scrum/sprint/550e8400-e29b-41d4-a716-446655440000/retrospective
 POST /scrum/sprint/550e8400-e29b-41d4-a716-446655440000/planning
-POST /scrum/sprint/550e8400-e29b-41d4-a716-446655440000/kickoff
 ```
 
 ## Response Format
@@ -72,14 +43,7 @@ All endpoints return a JSON response with:
 ## Tool Availability
 
 Available Scrum tools:
-- `scrum_sprint_retrospective` - Conduct retrospective with feedback collection
 - `scrum_sprint_planning` - Plan sprint backlog and validate capacity
-- `scrum_sprint_kickoff` - Start sprint with team alignment
-
-Legacy tools (if applicable):
-- `agile_create_sprint` - Create sprint summary
-- `agile_plan_sprint` - Plan backlog items with capacity check
-- `agile_add_backlog_item` - Register backlog item
 
 ## Error Handling
 

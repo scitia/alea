@@ -18,8 +18,6 @@ import java.util.List;
 @Entity
 public class Sprint {
 
-
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
