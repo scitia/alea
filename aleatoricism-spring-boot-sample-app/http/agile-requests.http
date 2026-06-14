@@ -1,0 +1,23 @@
+### Sprint planning
+POST {{url}}/sprint/planning
+Content-Type: application/json
+Accept: application/json
+
+{
+  "intent": "plan sprint",
+  "instructions": "Use 'agile_sprint_planning' tool",
+  "payload": {
+    "name": "Example name",
+    "goal": "Example goal",
+    "issues": [
+      {
+        "name": "Example Issue Name",
+        "description": "Example Issue Description",
+        "reporter": "John Doe",
+        "estimation": 3,
+        "acceptanceCriteria": ["Foo", "Criterion"]
+      }
+    ]
+  }
+}
+
